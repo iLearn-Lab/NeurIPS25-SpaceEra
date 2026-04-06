@@ -5,8 +5,6 @@ Project code for two components described in the paper:
 - `SpatialMind`: a structured prompting strategy for video-based spatial reasoning.
 - `ScanForgeQA`: a synthetic data construction pipeline for spatial question answering.
 
-The repository is implemented as a small, self-contained Python package so the prompting pipeline, the synthetic scene pipeline, and the generated artifacts all share the same schemas.
-
 ## Overview
 
 The paper presents a two-part framework for improving 3D spatial understanding from scanning videos:
@@ -46,7 +44,7 @@ The paper presents a two-part framework for improving 3D spatial understanding f
 
 ## SpatialMind Prompting Strategy
 
-`SpatialMind` is implemented in [`src/spaceera/spatialmind`](./src/spaceera/spatialmind). The code follows the process shown in the paper figure.
+`SpatialMind` is implemented in [`src/spaceera/spatialmind`](./src/spaceera/spatialmind).
 
 ![](asset/prompting.png)
 
@@ -66,7 +64,7 @@ The module [`src/spaceera/spatialmind/scene_decomposition.py`](./src/spaceera/sp
 
 ### Question Decomposition
 
-The module [`src/spaceera/spatialmind/question_decomposition.py`](./src/spaceera/spatialmind/question_decomposition.py) classifies a question against the paper-style reasoning templates defined in [`src/spaceera/spatialmind/question_bank.py`](./src/spaceera/spatialmind/question_bank.py).
+The module [`src/spaceera/spatialmind/question_decomposition.py`](./src/spaceera/spatialmind/question_decomposition.py) classifies a question against the reasoning templates defined in [`src/spaceera/spatialmind/question_bank.py`](./src/spaceera/spatialmind/question_bank.py).
 
 Supported question families include:
 
@@ -78,8 +76,6 @@ Supported question families include:
 - `absolute_distance`
 - `room_size`
 - `route_plan`
-
-If no template matches with enough confidence, the pipeline falls back to a generic spatial reasoning plan.
 
 ### Prompt Package Output
 
@@ -99,7 +95,7 @@ This output is meant to be passed to a downstream VLM or multimodal reasoning mo
 
 ### 1. Scene Construction
 
-The module [`src/spaceera/scanforgeqa/scene_construction.py`](./src/spaceera/scanforgeqa/scene_construction.py) converts a compact scene specification into a normalized scene graph with:
+The module [`src/spaceera/scanforgeqa/scene_construction.py`](./src/spaceera/scanforgeqa/scene_construction.py) converts a compact scene specification into a normalized scene structure with:
 
 - room geometry
 - object categories
@@ -124,8 +120,6 @@ The module [`src/spaceera/scanforgeqa/qa_generation.py`](./src/spaceera/scanforg
 - distance questions
 - object count questions
 - room area questions
-
-The data model is intentionally extensible so more templates can be added later.
 
 ## Installation
 
@@ -171,7 +165,7 @@ spaceera spatialmind \
 
 ## Utility Scripts
 
-The repository-level scripts are preserved as utility entry points:
+The scripts are preserved as utility entry points:
 
 - [`reason_steps.py`](./reason_steps.py): prints decomposed reasoning steps for one question.
 - [`gen_scene_exp.py`](./gen_scene_exp.py): prints the scene decomposition payload.
