@@ -1,0 +1,2 @@
+"""SpatialMind prompting components."""
+

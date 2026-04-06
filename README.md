@@ -1,35 +1,212 @@
-<h1 align="center"> <a href=''>Spatial Understanding from Videos: <br>Structured Prompts Meet Simulation Data</a></h2>
+# Spatial Understanding from Videos: Structured Prompts Meet Simulation Data
 
-> **TL;DR:** A framework that integrates spatial prompting and fine-tuning to enhance the 3D spatial understanding of VLMs from scanning videos.
+Reference codebase for two components described in the paper:
 
-## 📖 Abstract
-Visual-spatial understanding, the ability to infer object relationships and layouts from visual input, is fundamental to downstream tasks such as robotic navigation and embodied interaction. However, existing methods face spatial uncertainty and data scarcity, limiting the 3D spatial reasoning capability of pre-trained vision-language models (VLMs). To address these challenges, we present a unified framework for enhancing 3D spatial reasoning in pre-trained VLMs without modifying their architecture. This framework combines SpatialMind, a structured prompting strategy that decomposes complex scenes and questions into interpretable reasoning steps, with ScanForgeQA, a scalable question-answering dataset built from diverse 3D simulation scenes through an automated construction process designed for fine-tuning. Extensive experiments across multiple benchmarks demonstrate the individual and combined effectiveness of our prompting and fine-tuning strategies, and yield insights that may inspire future research on visual-spatial understanding.
+- `SpatialMind`: a structured prompting strategy for video-based spatial reasoning.
+- `ScanForgeQA`: a synthetic data construction pipeline for spatial question answering.
 
-## 📝 TODO List
-- [] Release of process documentation to support dataset construction
-- [] Release of the constructed dataset
-- [] Release of the source code
-- [x] Release of the [arXiv preprint](https://arxiv.org/abs/2506.03642)
+The repository is implemented as a small, self-contained Python package so the prompting pipeline, the synthetic scene pipeline, and the generated artifacts all share the same schemas.
 
-## 🔧 SpatialMind Prompting Strategy
-We propose a **SpatialMind** prompting strategy that enhances the spatial reasoning capabilities of VLMs without the need for fine-tuning. It consists of two main components: 1) Scene Decomposition, where the 3D scene depicted in the video is transformed into multiple different representations; and 2) Question Decomposition, in which the question is brokendown into a sequence of fine-grained reasoning steps.
+## Overview
+
+The paper presents a two-part framework for improving 3D spatial understanding from scanning videos:
+
+1. `SpatialMind Prompting Strategy`
+   - `Scene Decomposition`
+     - `Local Modeling`: infer object-centric local relations from partial observations.
+     - `Coordinate Mapping`: align local observations into a global 3D map and a 2D grid.
+     - `Cognition Generation`: convert the aligned geometry into textual scene descriptions.
+   - `Question Decomposition`
+     - route an input question to a known spatial reasoning template or build generic reasoning steps.
+
+2. `ScanForgeQA Dataset Construction`
+   - `Scene Construction`: assemble room-level layouts with object metadata.
+   - `Scan Creation`: generate orbit and navigation trajectories that mimic scanning videos.
+   - `QA Generation`: synthesize question-answer pairs from the scene graph and spatial ground truth.
+
+## Repository Layout
+
+```text
+.
+├── asset/
+├── examples/
+│   └── scene_spec.json
+├── src/
+│   └── spaceera/
+│       ├── cli.py
+│       ├── schemas.py
+│       ├── spatialmind/
+│       └── scanforgeqa/
+├── tests/
+├── gen_scene_exp.py
+├── nav_script.py
+├── reason_steps.py
+└── pyproject.toml
+```
+
+## SpatialMind Prompting Strategy
+
+`SpatialMind` is implemented in [`src/spaceera/spatialmind`](./src/spaceera/spatialmind). The code follows the process shown in the paper figure.
 
 ![](asset/prompting.png)
 
-## 🎯 ScanForgeQA Dataset Construction
-In addition to the prompting strategy, we also construct a novel dataset based on simulated scenarios, **ScanForgeQA**, to further enhance the spatial understanding capabilities of VLMs through training. The construction of the ScanForgeQA dataset involves a three-stage pipeline, including: 1) Scene Construction, where single-room 3D environments are created; 2) Scan Creation, in which egocentric videos are simulated by scanning through the constructed scenes; and 3) QA Generation, where textual question-answering pairs are automatically generated based on object annotations and the spatial layout of each scene.
+### Scene Decomposition
+
+The module [`src/spaceera/spatialmind/scene_decomposition.py`](./src/spaceera/spatialmind/scene_decomposition.py) generates three complementary views from a structured scene graph:
+
+- `local_modeling`
+  - chooses a room-level anchor object
+  - measures every object relative to that anchor
+- `coordinate_mapping`
+  - selects a global reference object
+  - produces a relative 3D map
+  - projects the scene onto a normalized 2D grid
+- `cognition_generation`
+  - converts coordinates into textual spatial descriptions
+
+### Question Decomposition
+
+The module [`src/spaceera/spatialmind/question_decomposition.py`](./src/spaceera/spatialmind/question_decomposition.py) classifies a question against the paper-style reasoning templates defined in [`src/spaceera/spatialmind/question_bank.py`](./src/spaceera/spatialmind/question_bank.py).
+
+Supported question families include:
+
+- `relative_distance`
+- `object_count`
+- `appearance_order`
+- `relative_direction`
+- `object_size`
+- `absolute_distance`
+- `room_size`
+- `route_plan`
+
+If no template matches with enough confidence, the pipeline falls back to a generic spatial reasoning plan.
+
+### Prompt Package Output
+
+The module [`src/spaceera/spatialmind/pipeline.py`](./src/spaceera/spatialmind/pipeline.py) assembles:
+
+- a system prompt
+- the full scene decomposition payload
+- the question decomposition payload
+
+This output is meant to be passed to a downstream VLM or multimodal reasoning model.
+
+## ScanForgeQA Dataset Construction
+
+`ScanForgeQA` is implemented in [`src/spaceera/scanforgeqa`](./src/spaceera/scanforgeqa). The code mirrors the three-stage construction process shown below.
 
 ![](asset/data.png)
 
-## 🏆 Evaluation
-We have validated our approach through extensive experiments across multiple benchmarks. Experimental results validate the effectiveness and generalizability of both SpatialMind  and ScanForgeQA, with their combination achieving further gains and providing valuable insights for future research.
+### 1. Scene Construction
+
+The module [`src/spaceera/scanforgeqa/scene_construction.py`](./src/spaceera/scanforgeqa/scene_construction.py) converts a compact scene specification into a normalized scene graph with:
+
+- room geometry
+- object categories
+- object centers and box sizes
+- optional metadata for later control or filtering
+
+The example file [`examples/scene_spec.json`](./examples/scene_spec.json) shows the expected input schema.
+
+### 2. Scan Creation
+
+The module [`src/spaceera/scanforgeqa/scan_creation.py`](./src/spaceera/scanforgeqa/scan_creation.py) creates a synthetic scan sequence with two motion primitives:
+
+- `orbit`: rotate around a reference object to maximize local coverage
+- `move_forward`: sweep through each room to simulate egocentric scanning
+
+The same module can also export a Blender camera script so the trajectory can be replayed in a renderer.
+
+### 3. QA Generation
+
+The module [`src/spaceera/scanforgeqa/qa_generation.py`](./src/spaceera/scanforgeqa/qa_generation.py) generates QA pairs from scene annotations and ground-truth geometry. The current reference implementation includes:
+
+- distance questions
+- object count questions
+- room area questions
+
+The data model is intentionally extensible so more templates can be added later.
+
+## Installation
+
+```bash
+python3 -m pip install -e .
+```
+
+## Quick Start
+
+### 1. Build a Scene Graph
+
+```bash
+spaceera build-scene \
+  --scene-spec examples/scene_spec.json \
+  --output outputs/scene_graph.json
+```
+
+### 2. Build a Synthetic Scan
+
+```bash
+spaceera build-scan \
+  --scene-graph outputs/scene_graph.json \
+  --output outputs/scan_sequence.json \
+  --blender-script outputs/scan_camera.py
+```
+
+### 3. Generate ScanForgeQA Pairs
+
+```bash
+spaceera generate-qa \
+  --scene-graph outputs/scene_graph.json \
+  --output outputs/qa_pairs.json
+```
+
+### 4. Build a SpatialMind Prompt Package
+
+```bash
+spaceera spatialmind \
+  --scene-graph outputs/scene_graph.json \
+  --question "What is the distance between the sofa and the coffee table?" \
+  --output outputs/spatialmind_prompt.json
+```
+
+## Compatibility Wrappers
+
+The original repository-level scripts are preserved as thin wrappers:
+
+- [`reason_steps.py`](./reason_steps.py): prints decomposed reasoning steps for one question.
+- [`gen_scene_exp.py`](./gen_scene_exp.py): prints the scene decomposition payload.
+- [`nav_script.py`](./nav_script.py): generates a Blender camera script from the demo scene.
+
+## Data Schemas
+
+The shared dataclasses live in [`src/spaceera/schemas.py`](./src/spaceera/schemas.py). They define:
+
+- `SceneGraph`
+- `Room`
+- `ObjectInstance`
+- `ScanSequence`
+- `ScanTrajectoryStep`
+- `VideoFrame`
+- `QuestionAnswer`
+
+This keeps `SpatialMind` and `ScanForgeQA` aligned around the same structured representation.
+
+## Testing
+
+Run the lightweight end-to-end test with:
+
+```bash
+PYTHONPATH=src python3 -m unittest discover -s tests -p 'test_*.py'
+```
+
+
+## Evaluation
 
 ![](asset/result.png)
 
-## 🎓 Citation
-If our work is helpful to you, please cite our paper.
+## Citation
 
-```
+```bibtex
 @article{zhang2025spatial,
   title={Spatial Understanding from Videos: Structured Prompts Meet Simulation Data},
   author={Zhang, Haoyu and Liu, Meng and Li, Zaijing and Wen, Haokun and Guan, Weili and Wang, Yaowei and Nie, Liqiang},
@@ -38,9 +215,10 @@ If our work is helpful to you, please cite our paper.
 }
 ```
 
-## 🙏 Acknowledgements
-We thank the authors of [VSI-Bench](https://github.com/vision-x-nyu/thinking-in-space) for releasing their evaluation benchmark, and we also acknowledge the authors from [LLaMA-Factory](https://github.com/hiyouga/LLaMA-Factory) for providing an easy-to-use and efficient platform for training and fine-tuning VLMs.
+## Acknowledgements
 
-## 🔖 License
-[MIT License]()
+We thank the authors of [VSI-Bench](https://github.com/vision-x-nyu/thinking-in-space) for releasing their benchmark, and the authors of [LLaMA-Factory](https://github.com/hiyouga/LLaMA-Factory) for their training framework.
 
+## License
+
+MIT
