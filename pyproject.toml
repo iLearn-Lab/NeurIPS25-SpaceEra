@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "spaceera"
 version = "0.1.0"
-description = "Reference implementation of SpatialMind prompting and ScanForgeQA dataset construction."
+description = "SpatialMind prompting and ScanForgeQA dataset construction."
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = []
@@ -18,4 +18,3 @@ package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
-

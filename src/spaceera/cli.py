@@ -48,7 +48,7 @@ def run_generate_qa(args: argparse.Namespace) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="SpaceEra reference implementation.")
+    parser = argparse.ArgumentParser(description="SpaceEra project CLI.")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     spatialmind = subparsers.add_parser("spatialmind", help="Build a SpatialMind prompt package.")
@@ -88,4 +88,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

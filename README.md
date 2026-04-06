@@ -1,6 +1,6 @@
 # Spatial Understanding from Videos: Structured Prompts Meet Simulation Data
 
-Reference codebase for two components described in the paper:
+Project code for two components described in the paper:
 
 - `SpatialMind`: a structured prompting strategy for video-based spatial reasoning.
 - `ScanForgeQA`: a synthetic data construction pipeline for spatial question answering.
@@ -119,7 +119,7 @@ The same module can also export a Blender camera script so the trajectory can be
 
 ### 3. QA Generation
 
-The module [`src/spaceera/scanforgeqa/qa_generation.py`](./src/spaceera/scanforgeqa/qa_generation.py) generates QA pairs from scene annotations and ground-truth geometry. The current reference implementation includes:
+The module [`src/spaceera/scanforgeqa/qa_generation.py`](./src/spaceera/scanforgeqa/qa_generation.py) generates QA pairs from scene annotations and ground-truth geometry. The current pipeline includes:
 
 - distance questions
 - object count questions
@@ -169,13 +169,13 @@ spaceera spatialmind \
   --output outputs/spatialmind_prompt.json
 ```
 
-## Compatibility Wrappers
+## Utility Scripts
 
-The original repository-level scripts are preserved as thin wrappers:
+The repository-level scripts are preserved as utility entry points:
 
 - [`reason_steps.py`](./reason_steps.py): prints decomposed reasoning steps for one question.
 - [`gen_scene_exp.py`](./gen_scene_exp.py): prints the scene decomposition payload.
-- [`nav_script.py`](./nav_script.py): generates a Blender camera script from the demo scene.
+- [`nav_script.py`](./nav_script.py): generates a Blender camera script from the example scene.
 
 ## Data Schemas
 
