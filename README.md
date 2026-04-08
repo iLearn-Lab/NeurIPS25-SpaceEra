@@ -1,9 +1,15 @@
 # Spatial Understanding from Videos: Structured Prompts Meet Simulation Data
 
-Project code for two components described in the paper:
+## Authors
 
-- `SpatialMind`: a structured prompting strategy for video-based spatial reasoning.
-- `ScanForgeQA`: a synthetic data construction pipeline for spatial question answering.
+Haoyu Zhang<sup>1,2</sup>, Meng Liu<sup>3,4*</sup>, Zaijing Li<sup>1,2</sup>, Haokun Wen<sup>1</sup>, Weili Guan<sup>1</sup>, Yaowei Wang<sup>1,2</sup>, Liqiang Nie<sup>1*</sup>
+
+<sup>1</sup> Harbin Institute of Technology (Shenzhen)  
+<sup>2</sup> Pengcheng Laboratory  
+<sup>3</sup> Shandong Jianzhu University  
+<sup>4</sup> Zhongguancun Academy  
+
+\* Corresponding authors
 
 ## Overview
 
