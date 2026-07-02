@@ -4,11 +4,31 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "spaceera"
-version = "0.1.0"
-description = "SpatialMind prompting and ScanForgeQA dataset construction."
+version = "0.2.0"
+description = "SpaceEra and SpaceEra++ spatial video understanding research code."
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = []
+
+[project.optional-dependencies]
+scenepick = [
+  "numpy>=1.23",
+  "torch>=2.3",
+]
+dev = [
+  "numpy>=1.23",
+]
+training = [
+  "torch>=2.3",
+  "transformers>=4.55,<5",
+  "trl==0.21.0",
+  "datasets>=3",
+  "accelerate>=1",
+  "peft>=0.14",
+  "qwen-vl-utils>=0.0.10",
+  "Pillow>=10",
+  "numpy>=1.23,<2",
+]
 
 [project.scripts]
 spaceera = "spaceera.cli:main"

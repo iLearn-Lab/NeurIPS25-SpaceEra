@@ -1,0 +1,21 @@
+{
+  "response": "<think>I place the objects on a 10x10 grid.</think><answer>front-right</answer>",
+  "task_reward": 1.0,
+  "predicted_coordinates": {
+    "bed": [2, 3],
+    "lamp": [7, 6],
+    "trash_bin": [5, 3]
+  },
+  "ground_truth_coordinates": {
+    "bed": [2, 3],
+    "lamp": [8, 6],
+    "trash_bin": [5, 3]
+  },
+  "category_counts": {
+    "bed": 1,
+    "lamp": 1,
+    "trash_bin": 1
+  },
+  "grid_size": 10,
+  "alpha": 0.5
+}
